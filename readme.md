@@ -1,147 +1,225 @@
 
-## ✅ Prasyarat
+## Prerequisits
 
-- Dompet dengan beberapa ETH Holesky di dalamnya. Jika Anda membutuhkan token testnet, Anda dapat memperolehnya dari faucet seperti [Google Faucet](https://cloud.google.com/application/web3/faucet/ethereum/holesky).
+- A wallet with some at Holesky ETH in it, if you need testnet tokens, you can get them from a faucet such as [Google Faucet](https://cloud.google.com/application/web3/faucet/ethereum/holesky)
 
----
+## Step 0 / Setup
 
-## 🛠️ Langkah 0: Persiapan
+Before we dive into integrating Venn, let’s ensure the demo dApp is correctly set up and everything works as expected.
 
-Sebelum kita mulai mengintegrasikan Venn, pastikan demo dApp telah disiapkan dengan benar dan berjalan sebagaimana mestinya.
+Follow these steps to get started:
 
-### 1️⃣ Clone Repo
+1. **Clone the Repo** 🖥️  
 
-```bash
-git clone https://github.com/ironblocks/hello-venn.git
-cd hello-venn
-```
+   ```bash
+   git clone https://github.com/ironblocks/hello-venn.git
+   cd hello-venn
+   ```
 
-### 2️⃣ Instal Dependensi
+   <br />
 
-```bash
-npm ci
-```
+2. **Install Dependencies** 📦  
 
-### 3️⃣ Siapkan Variabel Lingkungan
+   ```bash
+   npm ci
+   ```
 
-Salin file `.env.example` menjadi `.env` dan atur nilainya:
+   <br />
 
-```bash
-cp .env.example .env
-```
+3. **Setup Environment Variables** 🔑  
+   Copy the `.env.example` file to `.env` and set the values:
 
-Pastikan untuk mengatur variabel lingkungan berikut:
-- **`PRIVATE_KEY`**: Kunci untuk menerapkan kontrak ini.
-- **`HOLESKY_RPC_URL`**: URL RPC untuk Holesky.
-- **`VENN_PRIVATE_KEY`**: Digunakan oleh `venn-cli` untuk mengirim transaksi setup Venn.
+   ```bash
+   cp .env.example .env
+   ```
 
-### 4️⃣ Jalankan Pengujian
+   Make sure to set the following environment variables:
+   - **`PRIVATE_KEY`**
+      the key you will use for deploying this contract <br /><br />
 
-```bash
-npm test
-```
+   - **`HOLESKY_RPC_URL`**
+      the RPC URL to connect to Holesky <br /><br />
 
-Jika semua pengujian lulus, kita bisa lanjut ke langkah berikutnya.
+   - **`VENN_PRIVATE_KEY`**
+      used by the `venn-cli` to send Venn setup transactions. Usually, this would be the same as your **`PRIVATE_KEY`** <br /><br /><br />
 
----
+4. **Run Tests** 🧪
 
-## 🔗 Langkah 1: Tambahkan Venn ke Smart Contract Anda
+   ```bash
+   npm test
+   ```
 
-### 1️⃣ Instal Venn CLI
+   All tests pass, and we can continue to the next step.
+   <br /><br />
 
-```bash
-npm i -g @vennbuild/cli
-```
+## Step 1 / Add Venn To Your Smart Contracts
 
-### 2️⃣ Jalankan CLI pada Smart Contract
+Now that your demo dApp is set up, it’s time to make your smart contracts `Venn Ready`. In this step, we’ll integrate Venn’s security framework into the Safe Vault contract using the `venn-cli`.
 
-```bash
-venn fw integ -d contracts
-```
+This integration will:
 
-### 3️⃣ Tinjau Perubahan pada `SafeVault.sol`
+- Add Venn-Modifiers to your contract.
+- Prepare your contract to use Venn’s security infrastructure without changing its existing functionality.
+- Enable Venn, and move from `Venn Ready` to `Venn Enabled` in **Step 2** below.
 
-- Tambahan import **`VennFirewallConsumer`**.
-- Kontrak sekarang mewarisi **`VennFirewallConsumer`**.
-- Metode eksternal kini **`firewallProtected`**.
+1. **Install Venn CLI** 📦  
 
-### 4️⃣ Verifikasi Pengujian Masih Lulus
+   ```bash
+   npm i -g @vennbuild/cli
+   ```
 
-```bash
-npm test
-```
+   <br />
 
-### 5️⃣ Deploy Kontrak
+2. **Run the CLI on our contracts** 🛠️  
 
-```bash
-npm run step:1:deploy
-```
+   ```bash
+   venn fw integ -d contracts
+   ```
 
----
+   > **Note:** On the first run, this will also install the `@ironblocks/firewall-consumer` SDK package
 
-## 🔥 Langkah 2: Aktifkan Venn
+   <br />
 
-### 1️⃣ Aktifkan Venn
+3. **Review Changes to `SafeVault.sol`** 🔎  
 
-```bash
-venn enable --network holesky
-```
+   - An import for **`VennFirewallConsumer`** was added
+   - The contract now inherits the **`VennFirewallConsumer`**
+   - External methods are now **`firewallProtected`**
 
-### 2️⃣ Konfigurasi `venn.config.json`
+   <br />
 
-Tambahkan alamat `Venn Policy` ke dalam file **`venn.config.json`**:
+4. **Verify Tests Still Pass** 🧪
 
-```json
-{
-   "networks": {
-      "holesky": {
-         "contracts": {
-            "SafeVault": "..."
-         },
-         "policyAddress": "MASUKKAN ALAMAT KEBIJAKAN ANDA DI SINI"
+   ```bash
+   npm test
+   ```
+
+   <br />
+
+5. **Deploy** 🚀
+
+   ```bash
+   npm run step:1:deploy
+   ```
+
+   <br />
+
+6. **End 2 End Tests** ☘️
+
+   ```bash
+   npm run step:1:deposit
+   npm run step:1:withdraw
+   ```
+
+   Now that our contracts are **`Venn Ready`**, let's move on to making them **`Venn Enabled`**.
+
+   <br />
+
+## Step 2 / Enable Venn
+
+With your smart contracts now `Venn Ready`, it’s time to activate Venn’s security features. Using the `venn-cli`, we’ll enable real-time protection, ensuring your contracts are safeguarded against malicious transactions.
+
+1. **Enable Venn** 🛡️  
+
+   ```bash
+   venn enable --network holesky
+   ```
+
+   Our **`SafeVault`** is now protected by Venn.
+
+   <br />
+
+2. **Venn Policy Address** 📌
+
+   The CLI also prints out the address of our new `Venn Policy`
+   ![Venn Policy](https://storage.googleapis.com/venn-engineering/venn-cli/venn-policy.png) <br />
+   We'll need it in the next step, so go ahead and copy it into the **`venn.config.json`** file as follows:
+
+   ```json
+   {
+      "networks": {
+         "holesky": {
+               "contracts": {
+                  "SafeVault": "..."
+               },
+               "policyAddress": "PASTE YOUR POLICY ADDRESS HERE"
+         }
       }
    }
-}
-```
+   ```
 
----
+   <br />
 
-## 💻 Langkah 3: Tambahkan Venn SDK ke Frontend Anda
+3. **But Now Everything's Broken** 😱  
 
-### 1️⃣ Instal SDK
+   If we now try to deposit or withdraw, our transactions will fail
 
-```bash
-npm i @vennbuild/venn-dapp-sdk
-```
+   ```bash
+   npm run step:2:deposit
+   npm run step:2:withdraw
+   ```
 
-### 2️⃣ Gunakan SDK dalam Kode Anda
+   This is because Venn only allows approved transactions to go through.  
+   So, how do we get our transactions approved by Venn?
+   <br />
 
-Cek kode integrasi dalam file **[step-3/deposit.ts](scripts/step-3/deposit.ts)**.
+   > **TIP:** *See these **`Firewall Reverted`** transactions on the [Venn Explorer](https://explorer.venn.build)*
 
-```typescript
-const vennClient = new VennClient({
-    vennURL: VENN_SIGNER_URL,
-    vennPolicyAddress: VENN_POLICY_ADDRESS
-});
+   <br />
 
-const approvedTx = await vennClient.approve({
-    from: owner.address,
-    to: SAFE_VAULT_ADDRESS,
-    value: hre.ethers.parseEther("0.0001").toString(),
-    data: safeVault.interface.encodeFunctionData("deposit")
-});
-```
+## Step 3 / Add Venn SDK To Your Frontend
 
-### 3️⃣ Jalankan Transaksi yang Disetujui
+To complete your integration, we’ll use the `Venn dApp SDK` to ensure every transaction from your frontend is securely validated before being sent on-chain.
 
-```bash
-npm run step:3:deposit
-npm run step:3:withdraw
-```
+1. **Install The SDK** 📦  
 
----
+   ```bash
+   npm i @vennbuild/venn-dapp-sdk
+   ```
 
-## 🎯 Bab Bonus
+   <br />
 
-- Coba **[Venn Playground](https://playground.venn.build)** untuk versi live dari dApp **`SafeVault`**.
-- Gunakan **[Venn Explorer](https://explorer.venn.build)** untuk menjelajahi transaksi Anda.
+2. **Review The SDK Code** 🖥️  
+
+   For the purpose of this guide, we took the liberty of preparing all the code in advance, so you don't have to. <br /><br />
+
+   Checkout the integration code in the file **[step-3/deposit.ts](scripts/step-3/deposit.ts)**:
+
+   ```typescript
+   const vennClient = new VennClient({
+        vennURL: VENN_SIGNER_URL,
+        vennPolicyAddress: VENN_POLICY_ADDRESS
+   });
+
+   ...
+
+   const approvedTx = await vennClient.approve({
+      from: owner.address,
+      to: SAFE_VAULT_ADDRESS,
+      value: hre.ethers.parseEther("0.0001").toString(),
+      data: safeVault.interface.encodeFunctionData("deposit")
+   });
+   ```
+
+   <br />
+
+3. **Run Approved Transactions** 📦  
+
+   With the Venn DApp SDK installed, our updated **`deposit`** and **`withdraw`** scripts are now working again: <br /><br />
+
+   ```bash
+   npm run step:3:deposit
+   npm run step:3:withdraw
+   ```
+
+   <br />
+
+   > **TIP:** *See these transactions on the [Venn Explorer](https://explorer.venn.build)*
+
+   <br />
+
+## Bonus Round
+
+- Checkout **[Venn Playground](https://playground.venn.build)** for a live version of the **`SafeVault`** Hello Venn DApp <br />
+
+- Use the **[Venn Explorer](https://explorer.venn.build)** to ... well, explore :)
